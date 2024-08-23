@@ -30,13 +30,15 @@ class Train:
     _utils = None
     _id = None
     _num_of_samples = 30
-    _epochs = 100
+    _epochs = 3000
     _seed = None
     _batch_size = 30
     _fid_scores = []
     _generator_loss_arr = []
     _discriminator_loss_arr = []
     _train_dataset = None
+    _train_params = {}
+    
 
     def __init__(self, params) -> None:
         if (params.get('dataset_path') == None):
@@ -67,6 +69,7 @@ class Train:
             self.set_epochs(params.get('epochs'))
         self._set_training_data_dirs()
         self._train_dataset = self._get_dataset_tensor_array()
+        self._set_training_params(params)
 
     def get_batch_size(self):
         return self._batch_size
@@ -92,8 +95,10 @@ class Train:
     def start(self):
         generator = self._create_generator_model()
         discriminator = self._create_discriminator_model()
-        generator_optimizer = self._get_optimizer(opt='Adam', learning_rate=2e-3)
-        discriminator_optimizer = self._get_optimizer(opt='Adam', learning_rate=2e-3)
+        train_params = self._get_training_params()
+        generator_params, discriminator_params = train_params['generator'], train_params['discriminator']
+        generator_optimizer = self._get_optimizer(**generator_params)
+        discriminator_optimizer = self._get_optimizer(**discriminator_params)
         self._train(self._train_dataset, self.get_epochs(),generator=generator, discriminator=discriminator, generator_optimizer=generator_optimizer, discriminator_optimizer=discriminator_optimizer)
         self.end(generator=generator, discriminator=discriminator)
 
@@ -112,6 +117,25 @@ class Train:
     
     def _append_disc_loss(self, loss):
         self._discriminator_loss_arr.append(loss)
+
+    def _get_training_params(self):
+        return self._train_params
+
+    def _set_training_params(self, params):
+        self._train_params = {
+            'generator': {
+                'optimizer': params['gen_optimizer'],
+                'learning_rate': params['gen_learning_rate'],
+                'beta_1': params['gen_beta_1'],
+                'beta_2': params['gen_beta_2']
+            },
+            'discriminator': {
+                'optimizer': params['disc_optimizer'],
+                'learning_rate': params['disc_learning_rate'],
+                'beta_1': params['disc_beta_1'],
+                'beta_2': params['disc_beta_2']
+            }
+        }
 
     def _set_training_data_dirs(self):
         self._save_gen_dir = './gen-model-{}-{}'.format(self.today, self.get_id())
@@ -133,8 +157,8 @@ class Train:
         ds = self._utils.get_training_dataset()
         return tf.data.Dataset.from_tensor_slices(ds).shuffle(ds.shape[0]).batch(self.get_batch_size())
     
-    def _get_optimizer(self, opt, **kwargs):
-        return self._utils.get_optimizer(opt, **kwargs)
+    def _get_optimizer(self, optimizer, **kwargs):
+        return self._utils.get_optimizer(optimizer, **kwargs)
 
     
     def _view_images(self, lists, date="", epoch=0, run_id="", save = False):
