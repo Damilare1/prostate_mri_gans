@@ -2,7 +2,20 @@ import functools
 import sys
 import tensorflow as tf
 import tensorflow_probability as tfp
+
 class Eval:
+    # This function was copied from https://github.com/tensorflow/gan
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def _symmetric_matrix_square_root(self, mat, eps=1e-10):
         """Compute square root of a symmetric matrix.
 
@@ -29,6 +42,18 @@ class Eval:
         return tf.matmul(tf.matmul(u, tf.linalg.tensor_diag(si)), v, transpose_b=True)
 
 
+    # This function was copied from https://github.com/tensorflow/gan
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def _trace_sqrt_product(self, sigma, sigma_v):
         """Find the trace of the positive sqrt of product of covariance matrices.
 
@@ -69,7 +94,18 @@ class Eval:
 
         return tf.linalg.trace(self._symmetric_matrix_square_root(sqrt_a_sigmav_a))
 
-
+    # This function was copied from https://github.com/tensorflow/gan and modified slightly
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def _frechet_classifier_distance_from_activations_helper(
         self, activations1, activations2, streaming=False):
         """A helper function evaluating the frechet classifier distance."""
@@ -127,7 +163,18 @@ class Eval:
         else:
             return result[0]
 
-
+    # This function was copied from https://github.com/tensorflow/gan and modified slightly
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def _frechet_classifier_distance_helper(self, input_tensor1,
                                             input_tensor2,
                                             classifier_fn,
@@ -171,6 +218,18 @@ class Eval:
             num_batches,
             streaming=False)
     
+    # This function was copied from https://github.com/tensorflow/gan and modified
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def _classifier_fn(self):
       def classifier_fn(images):
         # view_images(images)
