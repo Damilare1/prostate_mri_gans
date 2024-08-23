@@ -1,6 +1,5 @@
 import sys
 import tensorflow as tf
-from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -93,8 +92,9 @@ class Train:
     def start(self):
         generator = self._create_generator_model()
         discriminator = self._create_discriminator_model()
-        generator_optimizar, discriminator_optimizer = self._get_optimizers()
-        self._train(self._train_dataset, self.get_epochs(),generator=generator, discriminator=discriminator, generator_optimizer=generator_optimizar, discriminator_optimizer=discriminator_optimizer)
+        generator_optimizer = self._get_optimizer(opt='Adam', learning_rate=2e-3)
+        discriminator_optimizer = self._get_optimizer(opt='Adam', learning_rate=2e-3)
+        self._train(self._train_dataset, self.get_epochs(),generator=generator, discriminator=discriminator, generator_optimizer=generator_optimizer, discriminator_optimizer=discriminator_optimizer)
         self.end(generator=generator, discriminator=discriminator)
 
     def end(self, generator, discriminator):
@@ -133,8 +133,9 @@ class Train:
         ds = self._utils.get_training_dataset()
         return tf.data.Dataset.from_tensor_slices(ds).shuffle(ds.shape[0]).batch(self.get_batch_size())
     
-    def _get_optimizers(self):
-        return self._utils.get_optimizer(), self._utils.get_optimizer() 
+    def _get_optimizer(self, opt, **kwargs):
+        return self._utils.get_optimizer(opt, **kwargs)
+
     
     def _view_images(self, lists, date="", epoch=0, run_id="", save = False):
         fig, axes = plt.subplots(nrows=1, ncols=lists.shape[3], figsize=(20, 20), squeeze=False)
@@ -200,7 +201,6 @@ class Train:
 
     def _train(self, dataset, epochs, generator, discriminator, generator_optimizer, discriminator_optimizer):
         checkpoint_prefix = os.path.join(self._checkpoint_dir, "ckpt")
-        
         checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                         discriminator_optimizer=discriminator_optimizer,
                                         generator=generator,

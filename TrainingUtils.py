@@ -1,14 +1,10 @@
 import sys
-from numpy import cross
 import tensorflow as tf
-from tensorflow.keras import layers
 import random
 import string
 import numpy as np
 import os
 import cv2
-
-import functools
 
 class TrainingUtils:
 
@@ -28,7 +24,8 @@ class TrainingUtils:
       self.__optimizer = opt
     if seed is not None:
       self.__seed = seed
-    
+  
+  @tf.autograph.experimental.do_not_convert 
   def get_cross_entropy(self):
     return self.__crossEntropy
 
@@ -38,13 +35,7 @@ class TrainingUtils:
   def get_training_dataset(self):
     return np.load(self.get_training_dataset_path())
 
-  def get_optimizer_function(self):
-    return self.__optimizer
-  
-  def set_optimizer_function(self, optimizer_fn):
-    self.__optimizer = optimizer_fn
-    return self
-
+  @tf.autograph.experimental.do_not_convert
   def get_seed(self):
     return self.__seed
   
@@ -64,9 +55,16 @@ class TrainingUtils:
     cross_entropy = self.get_cross_entropy()
     return cross_entropy(tf.ones_like(fake_output), fake_output)
 
-  def get_optimizer(self, learning_rate=2e-3, beta_1=0.5, beta_2=0.9):
-    opt = self.get_optimizer_function()
-    return opt(learning_rate, beta_1, beta_2)
+  def get_optimizer(self, opt= 'Adam', **kwargs):
+    opt_fn = None
+    if hasattr(tf.keras.optimizers, opt):
+        opt_fn = getattr(tf.keras.optimizers, opt)
+    elif hasattr(tf.keras.optimizers.legacy, opt):
+        opt_fn = getattr(tf.keras.optimizers.legacy, opt)
+    else:
+        raise ValueError(f"Optimizer '{opt}' not found.")
+    optimizer = opt_fn(**kwargs)
+    return optimizer
   
   def __id_generator(self, size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
