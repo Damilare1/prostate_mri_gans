@@ -2,8 +2,13 @@ import functools
 import sys
 import tensorflow as tf
 import tensorflow_probability as tfp
+import tensorflow_hub as tfhub
+import six
 
 class Eval:
+    INCEPTION_TFHUB = 'https://tfhub.dev/tensorflow/tfgan/eval/inception/1'
+    INCEPTION_OUTPUT = 'logits'
+    INCEPTION_FINAL_POOL = 'pool_3'
     # This function was copied from https://github.com/tensorflow/gan
     # Licensed under the Apache License, Version 2.0 (the "License");
     # you may not use this file except in compliance with the License.
@@ -163,6 +168,32 @@ class Eval:
         else:
             return result[0]
 
+    def _classifier_fn_from_tfhub(self, tfhub_module, output_fields, return_tensor=False):
+        """Returns a function that can be as a classifier function.
+
+        Wrapping the TF-Hub module in another function defers loading the module until
+        use, which is useful for mocking and not computing heavy default arguments.
+
+        Args:
+            tfhub_module: A string handle for a TF-Hub module.
+            output_fields: A string, list, or `None`. If present, assume the module
+            outputs a dictionary, and select this field.
+            return_tensor: If `True`, return a single tensor instead of a dictionary.
+
+        Returns:
+            A one-argument function that takes an image Tensor and returns outputs.
+        """
+        if isinstance(output_fields, six.string_types):
+            output_fields = [output_fields]
+        def _classifier_fn(images):
+            images = tf.squeeze(images, axis=-1)  # Remove the extra dimension
+            images = tf.image.resize(images, (299, 299))  # Resize images to match model input
+            images = tf.cast(images, tf.float32)  # Cast to tf.float32
+            output = tfhub.load(tfhub_module)(images)
+            return output
+        return _classifier_fn
+
+
     # This function was copied from https://github.com/tensorflow/gan and modified slightly
     # Licensed under the Apache License, Version 2.0 (the "License");
     # you may not use this file except in compliance with the License.
@@ -178,7 +209,7 @@ class Eval:
     def _frechet_classifier_distance_helper(self, input_tensor1,
                                             input_tensor2,
                                             classifier_fn,
-                                            num_batches=1,
+                                            num_batches=30,
                                             streaming=False):
       """A helper function for evaluating the frechet classifier distance."""
       input_list1 = tf.split(input_tensor1, num_or_size_splits=num_batches)
@@ -190,7 +221,7 @@ class Eval:
       # Compute the activations using the memory-efficient `map_fn`.
       def compute_activations(elems):
           return tf.map_fn(
-              fn=classifier_fn,
+              fn=lambda x: tf.cast(classifier_fn(x)['pool_3'], tf.float64),
               elems=elems,
               parallel_iterations=1,
               back_prop=False,
@@ -203,14 +234,15 @@ class Eval:
       # Ensure the activations have the right shapes.
       activations1 = tf.concat(tf.unstack(activations1), 0)
       activations2 = tf.concat(tf.unstack(activations2), 0)
-
+      act1 = activations1[:,0,0,:]
+      act2 = activations2[:,0,0,:]
       return self._frechet_classifier_distance_from_activations_helper(
-              activations1, activations2, streaming=streaming)
+              act1, act2, streaming=streaming)
 
     def _frechet_classifier_distance(self, input_tensor1,
                                     input_tensor2,
                                     classifier_fn,
-                                    num_batches=1):
+                                    num_batches=30):
         return self._frechet_classifier_distance_helper(
             input_tensor1,
             input_tensor2,
@@ -239,11 +271,11 @@ class Eval:
         return x
       return classifier_fn
 
-    def get_fid(self, real_image, gen_image):
+    def get_fid(self, real_image, gen_image, num_batches=30):
         frechet_inception_distance = functools.partial(
             self._frechet_classifier_distance,
-            classifier_fn=self._classifier_fn())
-        num_batches = 30 
+            classifier_fn=self._classifier_fn_from_tfhub(
+        self.INCEPTION_TFHUB, self.INCEPTION_FINAL_POOL, True))
     
         fid = frechet_inception_distance(real_image, gen_image, num_batches=num_batches)
         return fid
