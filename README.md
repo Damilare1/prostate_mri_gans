@@ -2,6 +2,11 @@
 
 This project provides a tool for training a model to generate augmented MRI images, specifically focused on prostate cancer (PCa MRI).
 
+### Install packages
+To install the compatible packages for the scripts, run
+```
+pip install -r requirements.txt
+```
 ### Training
 
 The `main.py` script simplifies the training process with the following features:

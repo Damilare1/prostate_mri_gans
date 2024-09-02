@@ -1,7 +1,5 @@
 import sys
 import tensorflow as tf
-from tensorflow.keras import layers
-import matplotlib.pyplot as plt
 import numpy as np
 from glob import glob
 import TrainingUtils
