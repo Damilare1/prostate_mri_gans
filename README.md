@@ -46,5 +46,10 @@ To generate T2-weighted MRI augmentations (TWI), run:
 
 Samples of generated images:
 - Augmented T2-Weighted Images - 1 sequence with 3 mid layers
-   ![image](https://github.com/user-attachments/assets/cd4e2781-bc4d-4f8d-8b1f-54835101973a)
+  <img width="147" alt="image" src="https://github.com/user-attachments/assets/a2802f2e-f188-448f-90c4-aaebb88c39f5">
+  <img width="147" alt="image" src="https://github.com/user-attachments/assets/38d7890f-e199-4f26-835d-ae122422aecb">
+  <img width="147" alt="image" src="https://github.com/user-attachments/assets/a34be1c7-300b-4b12-a63d-c3cc76133f98">
+
+
+
 
