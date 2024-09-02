@@ -43,3 +43,8 @@ To generate T2-weighted MRI augmentations (TWI), run:
 **Explanation:**
 
 * `image_type`: Specifies the type of PCa MRI image to generate. Defaults to "TWI" for T2-weighted imaging. You can adjust this parameter based on your dataset.
+
+Samples of generated images:
+- Augmented T2-Weighted Images - 1 sequence with 3 mid layers
+   ![image](https://github.com/user-attachments/assets/cd4e2781-bc4d-4f8d-8b1f-54835101973a)
+
