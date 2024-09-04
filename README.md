@@ -13,7 +13,7 @@ The `main.py` script simplifies the training process with the following features
 
 * **Entry point:** It acts as the main entry point for training.
 * **Parameter control:** Accepts various training parameters for customization, including:
-    * `dataset_path`: Path to your MRI dataset (required)
+    * `dataset_path`: Path to your MRI dataset containing normalized samples with dimension 160x160 (required)
     * `epochs`: Number of training epochs (default: 3000)
     * `gen_learning_rate`: Learning rate for the generator (default: 2e-3)
     * `disc_learning_rate`: Learning rate for the discriminator (default: 2e-3)
